@@ -1,20 +1,33 @@
+
+var stackTree = function (args, parent) {
+  this.args = args;
+  this.parent = parent;
+  this.children = [];
+  this.result = undefined; //just for clarity
+};
+
 var visualize = function (fn, name) {
-  var stackLevel = 0;
-  var lastResult;
+  var root = new stackTree(); 
+  var currentStack = root; 
 
   return function () {
-    var args = [].slice.call(arguments);
+    var args = Array.prototype.slice.call(arguments);
+
+    var newLevel = new stackTree(args, currentStack);
+    currentStack.children.push(newLevel);
+    currentStack = newLevel;
 
     //do viz stuff -- must draw before return or we don't see anything until recursion bottoms out
     //just placeholder for now
-    console.log('stackLevel: ' + stackLevel + '   arguments: ' + args + '   result so far: ' + lastResult);
+    console.log(currentStack);
 
-    stackLevel++;  //maybe use tree structure in order to represent branching calls, which calls are children of which, etc.
-    lastResult = fn.apply(null, args);
-    stackLevel--;
-    return lastResult;
-  }
-}
+    //evaluate our function!
+    var result = currentStack.result = fn.apply(null, args);
+    currentStack = currentStack.parent;
+
+    return result ;
+  };
+};
 
 
 var factViz = visualize(function (n) {
